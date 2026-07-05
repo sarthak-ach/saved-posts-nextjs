@@ -1,36 +1,68 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Next.js Community Forum — Saved Posts
+
+A complete full-stack discussion forum slice built with a Next.js App Router UI, Hono API Route Handlers, Neon / PostgreSQL integration via Drizzle ORM, and TanStack Query client state.
+
+---
+
+## Tech Stack
+
+- **Language**: TypeScript (strict mode)
+- **UI Framework**: React 19 & Next.js (App Router)
+- **Styling**: Vanilla CSS (premium custom glassmorphic theme)
+- **API Engine**: Hono (nested route handler under Next.js API routes)
+- **Database**: PostgreSQL (Neon Serverless / Local Docker Compose)
+- **ORM & Migrations**: Drizzle ORM & Drizzle Kit
+- **Client State / Cache**: TanStack React Query v5 (supporting optimistic UI updates)
+- **Validation**: Zod
+- **Testing Suite**: Vitest (pure unit logic & Hono API integration test mocks)
+
+---
 
 ## Getting Started
 
-First, run the development server:
-
+### 1. Install Dependencies
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Set Up Database
+Create a `.env.local` or `.env` file at the root of the project with your PostgreSQL connection string:
+```env
+DATABASE_URL="postgresql://postgres:password@localhost:5432/saved_posts"
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+To run a local PostgreSQL instance using Docker:
+```bash
+# Start Postgres container in the background
+docker compose up -d
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 3. Initialize Schema & Seed Data
+Push the Drizzle schema to the database and run the mock seeder ( Alice, Bob, Moderator Charlie):
+```bash
+# Push schema migrations
+npm run db:push
 
-## Learn More
+# Seed initial courses, users, enrollments, and posts
+npm run db:seed
+```
 
-To learn more about Next.js, take a look at the following resources:
+### 4. Run the Application
+Start the Next.js development server:
+```bash
+npm run dev
+```
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Running Tests
 
-## Deploy on Vercel
+Run the test suite (unit tests for bookmark state machine logic, and API route integration tests with mock database environments):
+```bash
+# Run tests once
+npm run test
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+# Run tests in watch mode
+npm run test:watch
+```
