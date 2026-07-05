@@ -59,21 +59,26 @@ export default function Home() {
     localStorage.setItem('theme', theme);
   }, [theme]);
 
+  const [isClient, setIsClient] = useState(false);
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
   // API hooks
-  const { data: courses, isLoading: coursesLoading, error: coursesError } = useCourses();
+  const { data: courses, isPending: coursesPending, error: coursesError } = useCourses();
   const selectedCourseId = activeCourseId || courses?.[0]?.id || '';
-  
+
   // Fetch feed posts when feed tab is active and course is selected
   const {
     data: feedPageData,
-    isLoading: feedLoading,
+    isPending: feedPending,
     error: feedError,
   } = useFeed(selectedCourseId, feedPage, LIMIT);
 
   // Fetch saved posts when saved tab is active
   const {
     data: savedPageData,
-    isLoading: savedLoading,
+    isPending: savedPending,
     error: savedError,
   } = useSavedList(savedPage, LIMIT);
 
@@ -140,7 +145,7 @@ export default function Home() {
               <Globe style={{ width: '1rem', height: '1rem', color: 'var(--muted)' }} />
               <select
                 className="select-control"
-                value={locale}
+                value={isClient ? locale : 'en'}
                 onChange={(e) => setLocale(e.target.value as Locale)}
                 aria-label="Select language"
               >
@@ -156,10 +161,12 @@ export default function Home() {
               onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
               className="btn-action"
               style={{ width: '2.2rem', height: '2.2rem', borderRadius: '10px' }}
-              title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+              title={!isClient ? 'Toggle theme' : theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
               aria-label="Toggle theme"
             >
-              {theme === 'dark' ? (
+              {!isClient ? (
+                <Sun style={{ width: '1rem', height: '1rem' }} />
+              ) : theme === 'dark' ? (
                 <Sun style={{ width: '1rem', height: '1rem' }} />
               ) : (
                 <Moon style={{ width: '1rem', height: '1rem' }} />
@@ -171,7 +178,7 @@ export default function Home() {
               <User style={{ width: '1rem', height: '1rem', color: 'var(--muted)' }} />
               <select
                 className="select-control"
-                value={currentUser.id}
+                value={isClient ? currentUser.id : MOCK_USERS[0].id}
                 onChange={(e) => {
                   const selected = MOCK_USERS.find((u) => u.id === e.target.value);
                   if (selected) {
@@ -223,7 +230,7 @@ export default function Home() {
                 {t('filterByCourse')}
               </h3>
 
-              {coursesLoading ? (
+              {coursesPending ? (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                   <div className="skeleton" style={{ height: '2rem', borderRadius: '8px' }} />
                   <div className="skeleton" style={{ height: '2rem', borderRadius: '8px' }} />
@@ -263,7 +270,7 @@ export default function Home() {
                   <AlertCircle style={{ width: '1.25rem', height: '1.25rem' }} />
                   <span>{feedError.message}</span>
                 </div>
-              ) : feedLoading ? (
+              ) : (coursesPending || (feedPending && selectedCourseId)) ? (
                 renderSkeletons()
               ) : feedPosts.length === 0 ? (
                 <div className="card-premium empty-state">
@@ -311,6 +318,11 @@ export default function Home() {
                           <span className="post-author">
                             <User style={{ width: '0.85rem', height: '0.85rem', marginInlineEnd: '0.25rem' }} />
                             {post.authorId}
+                            {isClient && post.createdAt && (
+                              <span style={{ marginInlineStart: '0.5rem', color: 'var(--muted)', fontWeight: 400 }}>
+                                • {new Date(post.createdAt).toLocaleDateString(locale, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                              </span>
+                            )}
                           </span>
                           <span className="save-count">
                             <Bookmark style={{ width: '0.85rem', height: '0.85rem', fill: 'currentColor' }} />
@@ -355,7 +367,7 @@ export default function Home() {
                 <AlertCircle style={{ width: '1.25rem', height: '1.25rem' }} />
                 <span>{savedError.message}</span>
               </div>
-            ) : savedLoading ? (
+            ) : savedPending ? (
               renderSkeletons()
             ) : savedPosts.length === 0 ? (
               <div className="card-premium empty-state">
@@ -389,6 +401,11 @@ export default function Home() {
                         <span className="post-author">
                           <User style={{ width: '0.85rem', height: '0.85rem', marginInlineEnd: '0.25rem' }} />
                           {post.authorId}
+                          {isClient && post.createdAt && (
+                            <span style={{ marginInlineStart: '0.5rem', color: 'var(--muted)', fontWeight: 400 }}>
+                              • {new Date(post.createdAt).toLocaleDateString(locale, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                            </span>
+                          )}
                         </span>
                         <span className="save-count">
                           <Bookmark style={{ width: '0.85rem', height: '0.85rem', fill: 'currentColor' }} />
